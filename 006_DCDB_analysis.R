@@ -26,7 +26,7 @@ repeated_SUNDHID <- DCDB_treatments %>%
 
 # Summary Statistics -------------------------------------------------------------------------
 
-## for basic sumamry statitics include:
+## for basic summary statitics include:
 # Retrieve: Age, Race frequency, Parity (for those with a Parity) and NA parities
 # retrieve: Amount of herds, Average amount of animals per herds, 
 
@@ -59,5 +59,15 @@ DCDB_UDD_DIAGNOSE |>
   summary()
 
 
+# Animals per CHR. FIX finish:
+DCDB_UDD_DIAGNOSE |>
+  dplyr::select(DYR_ID, CHR) |>
+  distinct(DYR_ID, .keep_all= TRUE) |>
+  count(CHR, sort = TRUE) |>
+  rename(Animals_per_CHR = n) |>
+  summary()
+
+DCDB_UDD_DIAGNOSE |>
+  count(CHR, sort = TRUE)
 
 

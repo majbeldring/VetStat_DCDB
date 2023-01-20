@@ -4,6 +4,8 @@
 #' UCPH, December 2022
 #' 
 #' 
+#' 4 herds bland altman plot
+#' 
 #'
 # Packages and settings: ----------------------------------------------------------------------
 
@@ -11,12 +13,8 @@ library(tidyverse)
 library(lubridate) # for date wrangling
 
 
-# Loading VetStat data: NOT sure what I need from this 
-load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/test_VetStat_new.RData") # 4 herds!! OK: CHR, ADD, product, Vnr (MINUS: disease group, but is given by a disease number)
-load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/test_VetStat_old.RData") # 4 herds!! OK: CHR, ADD, product, Vnr (MINUS: disease group, but is given by a disease number)
-load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/disease_group.RData") # Disease group KODE - to be merged with two aboves
-load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/product_new.RData")   # Product coding?
-load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/add_product_new.RData") # MISSING CHR - product code? ADD product code?
+# Loading VetStat data
+load("J:/IVH/Common/VETMYNdata/VetStat/Temporary/VetStat_AMU_ADD.RData") 
 
 # DCDB data
 load("K:/paper_vetstat/005_merge.RData")
@@ -26,7 +24,7 @@ rm(DCDB_test) # test data with four basic herds
 rm(DCDB_UDD_CHR) # useless. UDD not calculated in regards to diagnose, ATC or drug.
 gc()
 
-# left:
+# Kept:
 # DCDB_UDD_DIAGNOSE: Includes diagnose, ATC, Animal info etc. UDD coloumn created, not calculated
 # DCDB_UDD_ATC: UDD per herd per ATC group
 # DCDB_UDD_CHR_DRUG: UDD per herd per DRUG (NOTE: Some drug may be duplicated if name-change etc)
