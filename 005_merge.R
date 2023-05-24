@@ -1,7 +1,6 @@
 #' 
 #' 
 #' Maj Beldring, majbh@sund.ku.dk
-#' UCPH, December 2022
 #' 
 #' NOTE: aut.nr : Only very few left
 #' NOTE: age is now days /365.25
