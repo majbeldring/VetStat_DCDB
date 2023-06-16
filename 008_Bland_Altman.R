@@ -29,7 +29,7 @@ library(lubridate) # for date wrangling
 
 
 # Loading VetStat data
-load("K:/paper_vetstat/VetStat_AMU_ADD_2019.RData") 
+load("K:/paper_vetstat/misc/VetStat_AMU_ADD_2019.RData") 
 
 # DCDB data (2019 only- filtered for this in 005)
 load("K:/paper_vetstat/005_merge.RData")
@@ -141,7 +141,7 @@ vetstat_ATC <- droplevels(vetstat_ATC)
 
 # merge vetstat and DCDB -----------------
 
-df_ATC <- left_join(DCDB_ATC, vetstat_ATC, by = "ATC", sort="TRUE",allow.cartesian=TRUE) |>
+df_ATC <- left_join(DCDB_ATC, vetstat_ATC, by = "ATC", sort="TRUE", allow.cartesian=TRUE) |>
   filter(!is.na(ADD))
 
 df_CHR <- left_join(DCDB_CHR, vetstat_CHR, by = "CHR", sort="TRUE",allow.cartesian=TRUE) |>
@@ -229,8 +229,13 @@ bland.altman.plot(df_ATC$UDD, df_ATC$ADD, col.points = "blue", pch.points = 16, 
 devtools::install_github("deepankardatta/blandr")
 library("blandr")
 blandr.draw(df_CHR$UDD, df_CHR$ADD, plotTitle = "Bland-Altman Plot per CHR number")
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BlandAltman_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
+# width = 40, height = 20, units = "cm",
+
 
 blandr.draw(df_ATC$UDD, df_ATC$ADD, plotTitle = "Bland-Altman Plot per ATC")
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BlandAltman_ATC.tiff", width = 40, height = 20, units = "cm", dpi=300)
+# width = 40, height = 20, units = "cm",
 
 
 # for paper

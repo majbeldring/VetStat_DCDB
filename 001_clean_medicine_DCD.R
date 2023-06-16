@@ -75,5 +75,5 @@ glimpse(df_med)
 
 # save cleaned data: --------------------------------------------
 
-save.image("K:/paper_vetstat/001_med.RData")
+save.image("K:/paper_vetstat/misc/001_med.RData")
 

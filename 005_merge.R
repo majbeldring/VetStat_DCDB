@@ -1,8 +1,8 @@
 #' 
 #' 
-#' Maj Beldring, majbh@sund.ku.dk
+#' majbeldring, majbh@sund.ku.dk
 #' 
-#' NOTE: aut.nr : Only very few left
+#' NOTE: aut.nr : Only very few in data. Can't use this as an indicator
 #' NOTE: age is now days /365.25
 #' 
 #' 
@@ -11,7 +11,7 @@
 #' UDD - used daily dosis
 #' 
 #' 
-#' FIX: Keep ordinationsgruppe (disease group: 10 11 12 13 14 16 00/98/99? )
+#' FIX: Keep ordinationsgruppe
 #'
 # Packages and settings: ----------------------------------------------------------------------
 
@@ -23,9 +23,9 @@ library(lubridate) # for date wrangling
 
 
 # Loading data: 
-load("K:/paper_vetstat/001_med.RData") 
-load("K:/paper_vetstat/002_treat.RData")
-load("K:/paper_vetstat/004_other_data.RData")
+load("K:/paper_vetstat/misc/001_med.RData") 
+load("K:/paper_vetstat/misc/002_treat.RData")
+load("K:/paper_vetstat/misc/004_other_data.RData")
 
 
 
@@ -128,7 +128,7 @@ animals <- animals %>%
 gc()
 
 
-# merge animal infot to treat info
+# merge animal info to treat info
 treat_CHR_ani <- left_join(treat_CHR, animals, by = "DYR_ID", sort="TRUE",allow.cartesian=TRUE)
 rm(animals, treat_CHR); gc()
 
@@ -141,8 +141,9 @@ treat_CHR_ani$AGE <- as.numeric(treat_CHR_ani$AGE ) %/% 365.25
 gc()
 
 # Keeping only adult animals: age >= years or Parity >= 1
+# Removing animals < 2 years with no parity, and all animals =< 1 year.
 
-# first remove all cows older>2 on treatment day
+# first remove all cows older>2 on treatment day with no parity
 df_no_calvings <- treat_CHR_ani |>
   filter(is.na(PARITY)) |>
   filter(AGE >= 2)
@@ -265,7 +266,7 @@ gc()
 
 
 
-save.image("K:/paper_vetstat/005_merge.RData") 
+save.image("K:/paper_vetstat/misc/005_merge.RData") 
 
 
 

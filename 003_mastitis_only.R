@@ -9,7 +9,7 @@
 library(tidyverse) 
 library(data.table) # for adding a r for occurences of each dyr_IDAN
 
-load("K:/paper_vetstat/002_treat.RData")
+load("K:/paper_vetstat/misc/002_treat.RData")
 glimpse(df_treat)
 
 sundhed       <- read_csv("M:/data/sundhed.csv") 
@@ -68,6 +68,6 @@ mastitis_all_year <- mastitis_all_year %>%
 # save cleaned data: --------------------------------------------
 
 rm(df_treat, sundhed); gc()
-save.image("K:/paper_vetstat/003_mastitis.RData")
+save.image("K:/paper_vetstat/misc/003_mastitis.RData")
 
 

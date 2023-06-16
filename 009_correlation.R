@@ -18,7 +18,7 @@ hist(df_ATC$ADD)
 # ask matt: log-log vs R^2.. Log-log might not be ideal with our distribution...
 
 
-plot(df_ATC$ADD ~ df_ATC$UDD, xlim=c(0,500), ylim=c(0,500))
+plot(df_CHR$ADD ~ df_CHR$UDD, xlim=c(0,500), ylim=c(0,500))
 
 # colour by:
 ## herd size

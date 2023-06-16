@@ -15,4 +15,4 @@ plot(log.log.ATC, ncol = 3, label.size = 3)
 # interpret summary results:
 # https://quantifyinghealth.com/interpret-logistic-regression-coefficients/
 
-save.image("K:/paper_vetstat/008_009_010_output.RData")
+save.image("K:/paper_vetstat/misc/008_009_010_output.RData")

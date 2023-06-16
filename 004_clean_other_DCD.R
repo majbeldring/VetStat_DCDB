@@ -139,5 +139,5 @@ rm(brugsart, brugsartkode, beskart); gc()
 # CHR: CHR vs BES_ID
 # herd: con or eco
 
-save.image("K:/paper_vetstat/004_other_data.RData")
+save.image("K:/paper_vetstat/misc/004_other_data.RData")
 

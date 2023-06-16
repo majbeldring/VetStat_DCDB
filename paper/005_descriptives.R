@@ -10,7 +10,27 @@
 library(tidyverse)
 library(lubridate) # for date wrangling
 
-load("K:/paper_vetstat/misc/005_merge.RData")
+load("K:/paper_vetstat/004_data_ready.RData")
+
+
+
+
+
+# Summary DCDB ---------------------------------------------------------------
+
+# Unique animals AB treated per CHR:
+DCDB_UDD_DIAGNOSE |>
+  distinct(CHR, DYR_ID, .keep_all= TRUE) |>
+  count(CHR, sort = TRUE) |>
+  rename(AB_treated_unique_ani = n) |>
+  summary()
+
+# AB treatments per CHR:
+DCDB_UDD_DIAGNOSE |>
+  count(CHR, sort = TRUE) |>
+  rename(AB_treatments_per_CHR = n) |>
+  summary()
+
 
 
 
