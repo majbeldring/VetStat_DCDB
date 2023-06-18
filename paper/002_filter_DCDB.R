@@ -159,11 +159,13 @@ treatments <- left_join(df_treat, df_med, by = "SUNDH_ID")
 rm(df_med, df_treat)
 gc()
 
-
+treatments <- treatments |>
+  rename(Vnr = NORDISKEVARENR)
+gc()
 
 
 
 # save filtered data ------------------------------------------------------
 
-save.image("K:/paper_vetstat/002_filtered_DCDB.RData") 
+save.image("K:/paper_vetstat/002_treatments_DCDB.RData") 
 

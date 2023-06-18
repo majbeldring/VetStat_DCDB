@@ -47,6 +47,7 @@ df_med <- df_med %>%
 # df_med & ordiantionsgrupp via "ORDINATGRP_ID"
 ordinationsgruppekode <- ordinationsgruppekode %>%
   rename(ORDINATGRP_ID = ID)
+
 df_med <- full_join(df_med, ordinationsgruppekode, by = "ORDINATGRP_ID", sort="TRUE",allow.cartesian=TRUE) 
 rm(ordinationsgruppekode); gc()
 df_med <- df_med %>%

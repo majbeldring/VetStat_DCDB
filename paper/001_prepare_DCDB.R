@@ -27,7 +27,6 @@ ordinationsgruppekode   <- read_csv("M:/data/ordinationsgruppekode.csv")
 sunmedenhedskode        <- read_csv("M:/data/sunmedenhedskode.csv") 
 sundhed                 <- read_csv("M:/data/sundhed.csv") 
 lksygdomskode           <- read.csv("M:/data/lksygdomskode_fixed.csv") #debugged prior loading
-AB_treatments           <- read_csv("M:/AB_treatments.csv") # AB treated diseases identified by Søren & Jeanette
 kaelvninger             <- read_csv("M:/data/kaelvninger.csv") 
 dyrinfo                 <- read_csv("M:/data/dyrinfo.csv") 
 racekode                <- read_csv("M:/data/racekode.csv")
@@ -45,24 +44,25 @@ str(medicinanvendelseskode)
 str(sunmedenhedskode) #vetstat kode
 
 # medicindyr & medicinanvkode via "medicinankode"
-df_med <- full_join(medicindyr, medicinanvendelseskode, by = "MEDICINANVKODE", sort="TRUE",allow.cartesian=TRUE) 
-rm(medicinanvendelseskode); gc()
-rm(medicindyr); gc()
+df_med <- full_join(medicindyr, medicinanvendelseskode, by = "MEDICINANVKODE") 
+rm(medicinanvendelseskode, medicindyr); gc()
 df_med <- df_med %>%
   select(-TILBAGEHOLDELSEKOED, -TILBAGEHOLDELSEMAELK, -TBFENHEDKOEDKODE, -TBFENHEDMAELKKODE)
 
 # df_med & ordiantionsgrupp via "ORDINATGRP_ID"
 ordinationsgruppekode <- ordinationsgruppekode %>%
   rename(ORDINATGRP_ID = ID)
-df_med <- full_join(df_med, ordinationsgruppekode, by = "ORDINATGRP_ID", sort="TRUE",allow.cartesian=TRUE) 
+  
+df_med <- full_join(df_med, ordinationsgruppekode, by = "ORDINATGRP_ID") 
 rm(ordinationsgruppekode); gc()
 df_med <- df_med %>%
-  select(-ORDINATGRP_ID, -MEDICINANVKODE)
+  mutate(ID_disease_group = str_sub(ORDINATGRP_ID, 3, -1)) %>%
+  select(-MEDICINANVKODE, -ORDINATGRP_ID)
 
 # df_med & sunmedenhedskode via "SUNENHK_ID"
 sunmedenhedskode <- sunmedenhedskode %>%
   rename(SUNENHK_ID = ID)
-df_med <- full_join(df_med, sunmedenhedskode, by = "SUNENHK_ID", sort="TRUE",allow.cartesian=TRUE) 
+df_med <- full_join(df_med, sunmedenhedskode, by = "SUNENHK_ID") 
 rm(sunmedenhedskode); gc()
 df_med <- df_med %>%
   select(-SUNENHK_ID)
@@ -71,8 +71,9 @@ df_med <- df_med %>%
 # df_med & medicin via "MEDICIN_ID"
 medicin <- medicin %>%
   rename(MEDICIN_ID = ID)
-df_med <- full_join(df_med, medicin, by = "MEDICIN_ID", sort="TRUE",allow.cartesian=TRUE) 
+df_med <- full_join(df_med, medicin, by = "MEDICIN_ID") 
 df_med <- df_med %>%
+  rename(ATC=ATCKODE) %>%
   select(-MEDICIN_ID)
 rm(medicin); gc()
 
@@ -86,12 +87,6 @@ glimpse(df_med)
 
 str(sundhed); str(lksygdomskode) # sygdomsdato format: Date
 
-AB_treatments <- AB_treatments %>%
-  dplyr::select(-n, -UsesAB, -UsesAB2, -Comment, -LKSYGTEKST)
-
-lksygdomskode <- full_join(lksygdomskode, AB_treatments, by = "LKSYGKODE", sort="TRUE",allow.cartesian=TRUE) %>% 
-  dplyr::slice(1:241) # remove duplicates
-
 df_treat <- sundhed %>%
   filter(SYGDOMSDATO > as.Date("2015-12-31")) %>%
   dplyr::select(ID, BES_ID, DYR_ID, SYGDOMSDATO, LKSK_ID) %>%
@@ -100,10 +95,10 @@ df_treat <- sundhed %>%
 
 
 df_treat <- left_join(df_treat, lksygdomskode , by = "ID") %>%
-  dplyr::select(SUNDH_ID, BES_ID, DYR_ID, TREAT_DATE, LKSYGTEKST, AB) %>%
+  dplyr::select(SUNDH_ID, BES_ID, DYR_ID, TREAT_DATE, LKSYGTEKST) %>%
   rename(DISEASE = LKSYGTEKST)
 
-rm(sundhed, lksygdomskode, AB_treatments); gc()
+rm(sundhed, lksygdomskode); gc()
 
 glimpse(df_treat)
 
@@ -165,7 +160,9 @@ brugsart <- brugsart %>%
   group_by(DATO_TIL) %>% 
   replace_na(list(DATO_TIL = as.Date("2020-06-01")))
 
-brugsartkode <- dplyr::filter(brugsartkode, grepl('lk', BRUGSARTTEKST)) # keep only milk herds
+# keep milk farms (14, 16, 19, 20)
+Encoding(brugsartkode$BRUGSARTTEKST) <- "UTF-8"   # Set the encoding to UTF-8 (should already be, just to ensure it)
+brugsartkode <- dplyr::filter(brugsartkode, grepl('lk', BRUGSARTTEKST, ignore.case = TRUE, useBytes = TRUE))
 brugsartkode <- brugsartkode %>%
   dplyr::select(ID, BRUGSARTTEKST) %>%
   rename(HERD_TYPE = BRUGSARTTEKST) %>%

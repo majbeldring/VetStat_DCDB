@@ -25,7 +25,7 @@
 ## df_nordisk
 
 
-# Packages and settings: ----------------------------------------------------------------------
+# Packages and settings: -----------------------------------------------------
 
 library(tidyverse)
 library(lubridate) # for date wrangling
@@ -36,93 +36,90 @@ load("K:/paper_vetstat/003_final_DCDB.RData")
 
 
 
-# Keep only herds both in vetstat and DCDB ---------------
+# ATC -------------------------------------------------------------------------
 
-herds_dcdb <- DCDB_UDD_ATC |>
-  ungroup() |>
-  dplyr::select(CHR) |>
-  mutate(CHR = as.character(CHR))
-
-herds_vetstat <- VetStat_AMU_ADD |>
-  ungroup() |>
-  dplyr::select(CHR) |>
-  mutate(CHR = as.character(CHR))
-
-herds <- inner_join(herds_dcdb, herds_vetstat, by = "CHR") |>
-  distinct()
-
-DCDB_UDD_ATC <- DCDB_UDD_ATC |>
-  mutate(CHR = as.character(CHR))
-
-# keep only CHR appearing in herds: (can also be done with %in%)
-DCDB_UDD_ATC <- inner_join(herds, DCDB_UDD_ATC, by = "CHR")
-VetStat_AMU_ADD <- inner_join(herds, VetStat_AMU_ADD, by = "CHR")
-
-
-# prepare pre-merge DCDB  ------------------------------
-# prepare DCDB:
-DCDB_ATC <- DCDB_UDD_ATC |>
-  dplyr::select(ATCKODE, UDD_DCDB) |>
-  group_by(ATCKODE) |>
-  summarise(UDD = sum(UDD_DCDB)) |>
-  ungroup() |>
-  # prepare DCDB
-  rename(ATC=ATCKODE)
-
-DCDB_CHR <- DCDB_UDD_ATC |>
-  dplyr::select(CHR, UDD_DCDB) |>
-  group_by(CHR) |>
-  summarise(UDD = sum(UDD_DCDB)) |>
-  ungroup()
-
-DCDB_ATC <- droplevels(DCDB_ATC)
-DCDB_CHR <- droplevels(DCDB_CHR)
-
-
-# Plot VetStat alone ------------------------------------------------
-
-ggplot(data=VetStat_AMU_ADD, aes(x=ATC, y=ADD_sum_CHR_2019_cows)) +
-  geom_bar(stat="identity")
-
-
-# recrate above with merged Vetstat and DCDB. Fill = register type
-
-# prepapre vetstat:
-vetstat <- VetStat_AMU_ADD |>
-  ungroup() |> # to avoid disease group is kept
-  dplyr::select(CHR, ATC, ADD_sum_CHR_2019_cows) |>
-  rename(ADD_new = ADD_sum_CHR_2019_cows)|>
-  filter(!is.na(ATC))
-
-vetstat_CHR <- vetstat |>
-  dplyr::select(CHR, ADD_new) |>
-  group_by(CHR) |>
-  summarise(ADD = sum(ADD_new)) |>
-  ungroup()
-
-vetstat_ATC <- vetstat |>
-  dplyr::select(ATC, ADD_new) |>
+DCDB_ATC <- DCDB_AMU_UDD |>
+  dplyr::select(ATC, UDD) |>
   group_by(ATC) |>
-  summarise(ADD = sum(ADD_new)) |>
+  summarise(UDD = sum(UDD)) |>
   ungroup()
 
-vetstat_CHR <- droplevels(vetstat_CHR)
-vetstat_ATC <- droplevels(vetstat_ATC)
+Vet_ATC <- VetStat_AMU_ADD |>
+  dplyr::select(ATC, ADD) |>
+  group_by(ATC) |>
+  summarise(ADD = sum(ADD)) |>
+  ungroup()
+
+# Replacing NAs with zeros
+df_ATC <- full_join(DCDB_ATC, Vet_ATC, by = "ATC") |>
+  mutate_all(~replace_na(.x, 0))
+rm(Vet_ATC, DCDB_ATC); gc()
 
 
-# merge vetstat and DCDB -----------------
 
-df_ATC <- left_join(DCDB_ATC, vetstat_ATC, by = "ATC", sort="TRUE", allow.cartesian=TRUE) |>
-  filter(!is.na(ADD))
+# CHR -------------------------------------------------------------------------
 
-df_CHR <- left_join(DCDB_CHR, vetstat_CHR, by = "CHR", sort="TRUE",allow.cartesian=TRUE) |>
-  filter(!is.na(ADD))
+DCDB_CHR <- DCDB_AMU_UDD |>
+  dplyr::select(CHR, UDD) |>
+  group_by(CHR) |>
+  summarise(UDD = sum(UDD)) |>
+  ungroup()
+
+Vet_CHR <- VetStat_AMU_ADD |>
+  dplyr::select(CHR, ADD) |>
+  group_by(CHR) |>
+  summarise(ADD = sum(ADD)) |>
+  ungroup()
+
+df_CHR <- full_join(DCDB_CHR, Vet_CHR, by = "CHR") 
+rm(Vet_CHR, DCDB_CHR); gc()
+
+
+
+# Disease code ----------------------------------------------------------------
+
+DCDB_disease <- DCDB_AMU_UDD |>
+  dplyr::select(ID_disease_group, UDD) |>
+  group_by(ID_disease_group) |>
+  summarise(UDD = sum(UDD)) |>
+  ungroup()
+
+Vet_disease <- VetStat_AMU_ADD |>
+  dplyr::select(ID_disease_group, ADD) |>
+  group_by(ID_disease_group) |>
+  summarise(ADD = sum(ADD)) |>
+  ungroup()
+
+df_disease <- full_join(DCDB_disease, Vet_disease, by = "ID_disease_group") |>
+  mutate_all(~replace_na(.x, 0))
+rm(Vet_disease, DCDB_disease); gc()
+
+# laveling the disease codes
+disease_mapping <- data.frame(ID_disease_group = c("10", "11", "12", 
+                                                   "13", "14", "15", 
+                                                   "0", "23", "32", "34", "98", "99"),
+                              Name = c("Reproduction_urogenital", "Udder", "Gastro", 
+                                       "Respiratory", "Joint_Hoove_CentralN", "Joint_Hoove_CentralN", 
+                                       "Other", "Other", "Other", "Other", "Other", "Other"))
+df_disease_names <- left_join(df_disease, disease_mapping, by = "ID_disease_group")
+
+df_disease_names <- df_disease_names |>
+  select(-ID_disease_group) |>
+  group_by(Name) |>
+  summarize(sum_UDD = sum(UDD),
+            sum_ADD = sum(ADD))
+
+rm(disease_mapping); gc()
 
 
 
 
 # save data -----------------------------------------------------------------
 
-save.image("K:/paper_vetstat/004_data_ready.RData") 
+save.image("K:/paper_vetstat/004_data_for_BA.RData") 
+
+
+
+
 
 
