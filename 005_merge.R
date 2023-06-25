@@ -27,6 +27,8 @@ load("K:/paper_vetstat/misc/001_med.RData")
 load("K:/paper_vetstat/misc/002_treat.RData")
 load("K:/paper_vetstat/misc/004_other_data.RData")
 
+# original path to J drive VetStat:
+# J:\IVH\Common\VETMYNdata\VetStat\Temporary
 
 
 

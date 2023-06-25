@@ -32,22 +32,39 @@ library(lubridate) # for date wrangling
 
 # load data. Vetstat and DCDB
 load("K:/paper_vetstat/VetStat_AMU_ADD_2019.RData") 
-load("K:/paper_vetstat/003_final_DCDB.RData")
+load("K:/paper_vetstat/003_final_data_DCDB_VetStat.RData")
+load("K:/paper_vetstat/animals.RData")
 
+
+
+# Creating TF coloumn in both datas -----------------------------------------
+
+AniDays <- animals |>
+  dplyr::select(CHR, animal_days_year) |>
+  rename(AniYear = animal_days_year)
+
+DCDB_AMU_UDD_TF <- left_join(DCDB_AMU_UDD, AniDays, by= "CHR") |>
+  mutate(TF_UDD = (1000 * UDD /AniYear))
+
+
+VetStat_AMU_ADD_TF <- left_join(VetStat_AMU_ADD, AniDays, by= "CHR") |>
+  mutate(TF_ADD = (1000 * ADD /AniYear))
 
 
 # ATC -------------------------------------------------------------------------
 
-DCDB_ATC <- DCDB_AMU_UDD |>
-  dplyr::select(ATC, UDD) |>
+DCDB_ATC <- DCDB_AMU_UDD_TF |>
+  dplyr::select(ATC, UDD, TF_UDD) |>
   group_by(ATC) |>
-  summarise(UDD = sum(UDD)) |>
+  summarise(UDD = sum(UDD),
+            TF_UDD = sum(TF_UDD)) |>
   ungroup()
 
-Vet_ATC <- VetStat_AMU_ADD |>
-  dplyr::select(ATC, ADD) |>
+Vet_ATC <- VetStat_AMU_ADD_TF |>
+  dplyr::select(ATC, ADD, TF_ADD) |>
   group_by(ATC) |>
-  summarise(ADD = sum(ADD)) |>
+  summarise(ADD = sum(ADD),
+            TF_ADD = sum(TF_ADD)) |>
   ungroup()
 
 # Replacing NAs with zeros
@@ -59,16 +76,18 @@ rm(Vet_ATC, DCDB_ATC); gc()
 
 # CHR -------------------------------------------------------------------------
 
-DCDB_CHR <- DCDB_AMU_UDD |>
-  dplyr::select(CHR, UDD) |>
+DCDB_CHR <- DCDB_AMU_UDD_TF |>
+  dplyr::select(CHR, UDD, TF_UDD) |>
   group_by(CHR) |>
-  summarise(UDD = sum(UDD)) |>
+  summarise(UDD = sum(UDD),
+            TF_UDD = sum(TF_UDD)) |>
   ungroup()
 
-Vet_CHR <- VetStat_AMU_ADD |>
-  dplyr::select(CHR, ADD) |>
+Vet_CHR <- VetStat_AMU_ADD_TF |>
+  dplyr::select(CHR, ADD, TF_ADD) |>
   group_by(CHR) |>
-  summarise(ADD = sum(ADD)) |>
+  summarise(ADD = sum(ADD),
+            TF_ADD = sum(TF_ADD)) |>
   ungroup()
 
 df_CHR <- full_join(DCDB_CHR, Vet_CHR, by = "CHR") 
@@ -78,16 +97,18 @@ rm(Vet_CHR, DCDB_CHR); gc()
 
 # Disease code ----------------------------------------------------------------
 
-DCDB_disease <- DCDB_AMU_UDD |>
-  dplyr::select(ID_disease_group, UDD) |>
+DCDB_disease <- DCDB_AMU_UDD_TF |>
+  dplyr::select(ID_disease_group, UDD, TF_UDD) |>
   group_by(ID_disease_group) |>
-  summarise(UDD = sum(UDD)) |>
+  summarise(UDD = sum(UDD),
+            TF_UDD = sum(TF_UDD)) |>
   ungroup()
 
-Vet_disease <- VetStat_AMU_ADD |>
-  dplyr::select(ID_disease_group, ADD) |>
+Vet_disease <- VetStat_AMU_ADD_TF |>
+  dplyr::select(ID_disease_group, ADD, TF_ADD) |>
   group_by(ID_disease_group) |>
-  summarise(ADD = sum(ADD)) |>
+  summarise(ADD = sum(ADD),
+            TF_ADD = sum(TF_ADD)) |>
   ungroup()
 
 df_disease <- full_join(DCDB_disease, Vet_disease, by = "ID_disease_group") |>
@@ -107,9 +128,13 @@ df_disease_names <- df_disease_names |>
   select(-ID_disease_group) |>
   group_by(Name) |>
   summarize(sum_UDD = sum(UDD),
-            sum_ADD = sum(ADD))
+            sum_TF_UDD = sum(TF_UDD),
+            sum_ADD = sum(ADD),
+            sum_TF_ADD = sum(TF_ADD))
 
 rm(disease_mapping); gc()
+
+
 
 
 

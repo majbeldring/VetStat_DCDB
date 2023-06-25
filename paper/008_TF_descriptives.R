@@ -28,7 +28,7 @@ disease_codes <- lksygdomskode |>
   filter(ID_disease_group %in% diseases) |>
   distinct(ID_disease_group, .keep_all = TRUE)
 
-# labeling the disease codes
+# laveling the disease codes
 disease_mapping <- data.frame(ID_disease_group = c("10", "11", "12", 
                                                 "13", "14", "15", 
                                                 "0", "23", "32", "34", "98", "99"),
