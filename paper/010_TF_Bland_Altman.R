@@ -23,33 +23,35 @@ cbbPalette <- c("#E69F00", "#56B4E9", "#009E73","#CC79A7", "#F0E442", "#0072B2",
 
 # ATC
 df_ATC_BA <- df_ATC |>
-  select(ADD, UDD)
+  select(TF_ADD, TF_UDD)
 df_ATC_BA$average <- rowMeans(df_ATC_BA)
-df_ATC_BA$difference <- df_ATC_BA$UDD - df_ATC_BA$ADD  # create column for difference measurement
+df_ATC_BA$difference <- df_ATC_BA$TF_UDD - df_ATC_BA$TF_ADD  # create column for difference measurement
 mean_difference <- mean(df_ATC_BA$difference)    # calculate mean difference
 
 # calculate uppr and lower limits of the CI of 95%
 lower_limit <- mean_difference - 1.96*sd(df_ATC_BA$difference )
 upper_limit <- mean_difference + 1.96*sd(df_ATC_BA$difference )
 
-# Plot ATC
+# Plot ATC, # outlier: QJ01CE09
 ggplot(df_ATC_BA, aes(x = average, y = difference)) +
-  geom_hline(yintercept = mean_difference, color= "#D55E00", lwd=2) +
-  geom_hline(yintercept = lower_limit, color = "#009E73", lwd=2) +
-  geom_hline(yintercept = upper_limit, color = "#009E73", lwd=2) +
-  geom_point(shape=23, fill="#56B4E9", size=6) +
+  geom_hline(yintercept = mean_difference, color = "#D55E00", lwd = 2) +
+  geom_hline(yintercept = lower_limit, color = "#009E73", lwd = 2) +
+  geom_hline(yintercept = upper_limit, color = "#009E73", lwd = 2) +
+  geom_point(shape = 23, fill = "#56B4E9", size = 6) +
   annotate("text", x = max(df_ATC_BA$average), y = min(df_ATC_BA$difference),
            label = "QJ01CE09", hjust = 1, vjust = -0.5, color = "black", size = 7) +
   theme_bw() +
   theme(text = element_text(size = 22))
-ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_ATC.tiff", width = 40, height = 20, units = "cm", dpi=300)
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_TF_ATC.tiff", width = 40, height = 20, units = "cm", dpi=300)
+
+
 
 
 # CHR
 df_CHR_BA <- df_CHR |>
-  select(ADD, UDD)
+  select(TF_ADD, TF_UDD)
 df_CHR_BA$average <- rowMeans(df_CHR_BA)
-df_CHR_BA$difference <- df_CHR_BA$UDD - df_CHR_BA$ADD  # create column for difference measurement
+df_CHR_BA$difference <- df_CHR_BA$TF_UDD - df_CHR_BA$TF_ADD  # create column for difference measurement
 mean_difference <- mean(df_CHR_BA$difference)    # calculate mean difference
 
 # calculate uppr and lower limits of the CI of 95%
@@ -64,14 +66,14 @@ ggplot(df_CHR_BA, aes(x = average, y = difference)) +
   geom_point(shape=23, fill="#56B4E9", size=2.5) +
   theme_bw() +
   theme(text = element_text(size = 22))
-ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_TF_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
 
 
-# ID_disease_group
+# ID_disease_group with TF
 df_disease_BA <- df_disease_names |>
-  select(sum_ADD, sum_UDD)
+  select(sum_TF_ADD, sum_TF_UDD)
 df_disease_BA$average <- rowMeans(df_disease_BA)
-df_disease_BA$difference <- df_disease_BA$sum_UDD - df_disease_BA$sum_ADD  # create column for difference measurement
+df_disease_BA$difference <- df_disease_BA$sum_TF_UDD - df_disease_BA$sum_TF_ADD  # create column for difference measurement
 mean_difference <- mean(df_disease_BA$difference)    # calculate mean difference
 
 # calculate uppr and lower limits of the CI of 95%
@@ -88,7 +90,7 @@ ggplot(df_disease_BA, aes(x = average, y = difference)) +
            label = "Udder", hjust = 1.2, vjust = 0.9, color = "black", size = 7) +
   theme_bw() +
   theme(text = element_text(size = 22))
-ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_disease.tiff", width = 40, height = 20, units = "cm", dpi=300)
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/BA_TF_disease.tiff", width = 40, height = 20, units = "cm", dpi=300)
 
 
 

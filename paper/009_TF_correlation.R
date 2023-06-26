@@ -23,33 +23,23 @@ load("K:/paper_vetstat/004_data_for_BA.RData")
 cbbPalette <- c("#E69F00", "#56B4E9", "#009E73","#CC79A7", "#F0E442", "#0072B2", "#D55E00")
 
 
-# FIX:
-# combine DCDB_AMU_UDD and VetStat_AMU_ADD.
-# We want:
-# CHR; Name (disease); UDD; ADD
-
-# 1. remove ATC from both -> summarize CHR and ID_disease_group
-# 2. Add Name (diseases) -> remove ID_disease_group -> summarize name
-# 3. Merge Vetstat and DCDB
-# 4. Final data...
 
 
-# correlations ---------------------------------------------------------------
+# correlations TF data ---------------------------------------------------------------
 
 # spearman CHR
 
-cor_herd <- cor(df_CHR$UDD, df_CHR$ADD, method = "spearman"); print(cor_herd)
-cor.test(df_CHR$UDD, df_CHR$ADD, method = "spearman")
-hist(df_CHR$UDD); hist(df_CHR$ADD) # to see distributions of ADD and UDD
+cor_herd <- cor(df_CHR$TF_UDD, df_CHR$TF_ADD, method = "spearman"); print(cor_herd)
+cor.test(df_CHR$TF_UDD, df_CHR$TF_ADD, method = "spearman")
+hist(df_CHR$TF_UDD); hist(df_CHR$TF_ADD) # to see distributions of ADD and UDD
 
-ggplot(df_CHR, aes(ADD, UDD)) + 
+ggplot(df_CHR, aes(TF_ADD, TF_UDD)) + 
   geom_point(color='#009E73', size = 2.5) +
-  xlim(0, 500) +
-  ylim(0, 500) +
-  stat_cor(method = "pearson") +   # note; R=0.78 applies to data within x,y lim
+  stat_cor(method = "pearson", size = 7) +   # note; R=0.78 applies to data within x,y lim
+  labs(x = "TF ADD", y = "TF UDD") +  # Set the x-axis and y-axis labels
   theme_bw() +
   theme(text = element_text(size = 22))
-ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_TF_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
 
 
 # Spearman ratio, if splitting data 1:2 
@@ -57,14 +47,14 @@ ratio <- 6/1
 
 # Filter the data based on the patterns
 df1 <- df_CHR %>%
-  filter(ADD <= ratio * UDD)
+  filter(TF_ADD <= ratio * TF_UDD)
 
 df2 <- df_CHR %>%
-  filter(ADD > ratio * UDD)
+  filter(TF_ADD > ratio * TF_UDD)
 
 # Calculate the Spearman correlation for each pattern
-cor1 <- cor(df1$ADD, df1$UDD, method = "spearman")
-cor2 <- cor(df2$ADD, df2$UDD, method = "spearman")
+cor1 <- cor(df1$TF_ADD, df1$TF_UDD, method = "spearman")
+cor2 <- cor(df2$TF_ADD, df2$TF_UDD, method = "spearman")
 
 # Create the correlation data for plotting
 correlation_data <- data.frame(
@@ -73,11 +63,12 @@ correlation_data <- data.frame(
 )
 
 # Create the ggplot with points and correlations
-correlation_plot <- ggplot(df_CHR, aes(ADD, UDD)) +
+correlation_plot <- ggplot(df_CHR, aes(TF_ADD, TF_UDD)) +
   geom_point(color = '#009E73', size = 2.5) +
-  xlim(0, 500) +
-  ylim(0, 500) +
-  stat_cor(method = "pearson") +
+  xlim(0, 20) +
+  ylim(0, 20) +
+  stat_cor(method = "spearman", size = 7) +
+  labs(x = "TF ADD", y = "TF UDD") +  # Set the x-axis and y-axis labels
   theme_bw() +
   theme(text = element_text(size = 22))
 
@@ -85,32 +76,58 @@ correlation_plot <- ggplot(df_CHR, aes(ADD, UDD)) +
 correlation_plot +
   geom_abline(slope = cor1, intercept = 0, color = "red", linetype = "dashed") +
   geom_abline(slope = cor2, intercept = 0, color = "red", linetype = "dashed")
-ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_CHR.tiff", width = 40, height = 20, units = "cm", dpi=300)
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_TF_CHR_ratio.tiff", width = 40, height = 20, units = "cm", dpi=300)
 
 
 
 
 
 
-# Spearman correlation disease (prescription group) --------------------------
-cor_disease <- cor(df_CHR$UDD, df_CHR$ADD, method = "spearman")
-cor.test(df_CHR$UDD, df_CHR$ADD, method = "spearman")
-hist(df_CHR$UDD)
-hist(df_CHR$ADD)
+# Spearman correlation TF_disease (prescription group) --------------------------
+cor_disease <- cor(df_disease$TF_UDD, df_disease$TF_ADD, method = "spearman")
+cor.test(df_disease$TF_UDD, df_disease$TF_ADD, method = "spearman")
+hist(df_disease$TF_UDD)
+hist(df_disease$TF_ADD)
 
-plot(df_CHR$ADD ~ df_CHR$UDD, xlim=c(0,500), ylim=c(0,500))
+ggplot(df_disease_names, aes(sum_TF_ADD, sum_TF_UDD)) +
+  geom_point(size = 5, shape = 23, fill = "#009E73", color = "#D55E00") +
+  geom_point(data = subset(df_disease_names, Name == "Udder"), 
+             aes(sum_TF_ADD, sum_TF_UDD), size = 8, shape = 4, fill = "red", color = "black") +
+  stat_cor(method = "pearson", size = 7) +
+  theme_bw() +
+  theme(text = element_text(size = 22))
 
-ggplot(df_CHR, aes(ADD, UDD)) + 
-  geom_point()
+
+ggplot(df_disease_names, aes(sum_TF_ADD, sum_TF_UDD)) +
+  geom_point(size = 5, shape = 23, fill = "#009E73", color = "#D55E00") +
+  geom_text(data = subset(df_disease_names, Name == "Udder"),
+            aes(label = Name), hjust = 1, vjust = 1, color = "black", size = 7, nudge_x = 1, nudge_y = 1) +
+  stat_cor(method = "pearson", size = 7) +
+  labs(x = "TF ADD", y = "TF UDD") +  # Set the x-axis and y-axis labels
+  theme_bw() +
+  theme(text = element_text(size = 22))
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_TF_disease.tiff", width = 40, height = 20, units = "cm", dpi=300)
 
 
 
-# Spearman correlation ATC:
-cor_atc <- cor(df_ATC$UDD, df_ATC$ADD)
-cor.test(df_ATC$UDD, df_ATC$ADD, method = "spearman")
 
-hist(df_ATC$UDD)
-hist(df_ATC$ADD)
+# Spearman correlation TF_ATC --------------------------------------------------
+cor_atc <- cor(df_ATC$TF_UDD, df_ATC$TF_ADD)
+cor.test(df_ATC$TF_UDD, df_ATC$TF_ADD, method = "spearman")
 
-plot(df_ATC$ADD ~ df_ATC$UDD, xlim=c(0,500), ylim=c(0,500))
+hist(df_ATC$TF_UDD)
+hist(df_ATC$TF_ADD)
+
+# correlation plot
+# QJ01CE09 is the outlier
+ggplot(df_ATC, aes(TF_ADD, TF_UDD)) +
+  geom_point(size = 5, shape = 23, fill = "#009E73", color = "#D55E00") +
+  geom_text(data = subset(df_ATC, ATC == "QJ01CE09"),
+            aes(label = ATC), hjust = 1, vjust = 1.3, color = "black", size = 7, nudge_x = 1, nudge_y = 1) +
+  stat_cor(method = "pearson", size = 7) +
+  labs(x = "TF ADD", y = "TF UDD") +  # Set the x-axis and y-axis labels
+  theme_bw() +
+  theme(text = element_text(size = 22))
+ggsave("C:/Users/zjt234/PhD/PaperIII_VetStat/Spearman_TF_ATC.tiff", width = 40, height = 20, units = "cm", dpi=300)
+
 
